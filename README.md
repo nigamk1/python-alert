@@ -1,15 +1,16 @@
 # Nifty 50 EMA Alerts with Upstox + Telegram
 
-A Python-based automated trading alert system that monitors Nifty 50 index using Upstox API and sends real-time EMA-based signals to Telegram.
+A Python-based automated trading alert system that monitors Nifty 50 index using Upstox API and sends real-time EMA-based signals to Telegram. Deployed on Netlify with GitHub Actions for lifetime alerts.
 
 ## 🚀 Features
 
 - **Real-time Monitoring**: Fetches live Nifty 50 data using 1-minute intervals, converted to 5-minute candles
 - **EMA Analysis**: Calculates Exponential Moving Average (default: EMA 5)
-- **Smart Alerts**: Sends Telegram notifications for bullish/bearish signals
+- **Smart Alerts**: Sends Telegram notifications for bullish signals only
 - **Duplicate Prevention**: Avoids sending repeated alerts for the same signal
-- **Auto Authentication**: Uses access token for authentication (re-authenticate when token expires)
-- **Error Handling**: Comprehensive error handling and notifications
+- **Automated Scheduling**: GitHub Actions trigger alerts every 5 minutes during market hours
+- **One-Time Setup**: Configure once, receive lifetime alerts
+- **Serverless**: Runs on Netlify Functions with zero maintenance
 
 ## ⚠️ Important Notes About Upstox API
 
@@ -22,13 +23,24 @@ A Python-based automated trading alert system that monitors Nifty 50 index using
 
 ```
 Python/
-├── main.py                 # Main script - runs the monitoring loop
+├── main.py                 # Main script - local development & testing
 ├── auth.py                 # Handles Upstox authentication & token management
 ├── upstox_client.py        # Upstox API wrapper for data fetching & EMA calculation
 ├── telegram_bot.py         # Telegram bot for sending alerts
-├── config.json             # Configuration file for API keys
-├── upstox_refresh.json     # Stores refresh token (auto-generated)
-├── alert_state.json        # Tracks alert state (auto-generated)
+├── netlify/
+│   └── functions/          # Netlify serverless functions
+│       ├── check_alerts.py # Main monitoring function
+│       ├── auth.py         # Authentication endpoint
+│       ├── status.py       # Health check endpoint
+│       └── requirements.txt # Python dependencies
+├── .github/
+│   └── workflows/
+│       └── cron-alerts.yml # GitHub Actions cron job
+├── config.json             # Configuration file for API keys (local only)
+├── config.sample.json      # Template for API configuration
+├── netlify.toml            # Netlify configuration
+├── requirements.txt        # Python dependencies
+├── NETLIFY_DEPLOYMENT.md   # Deployment guide
 └── README.md              # This file
 ```
 
