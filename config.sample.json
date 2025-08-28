@@ -1,0 +1,11 @@
+{
+  "upstox": {
+    "client_id": "YOUR_UPSTOX_CLIENT_ID",
+    "client_secret": "YOUR_UPSTOX_CLIENT_SECRET",
+    "redirect_uri": "http://localhost:5000/callback"
+  },
+  "telegram": {
+    "bot_token": "YOUR_TELEGRAM_BOT_TOKEN",
+    "chat_id": "YOUR_TELEGRAM_CHAT_ID"
+  }
+}
