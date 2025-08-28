@@ -1,0 +1,76 @@
+name: Daily Token Refresh Reminder
+
+on:
+  schedule:
+    # Run at 8:00 AM IST every day (2:30 AM UTC)
+    - cron: '30 2 * * *'
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  token-reminder:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+        
+    - name: Send Token Refresh Reminder
+      run: |
+        python -c "
+        import requests
+        import json
+        from datetime import datetime, timedelta
+        
+        # Telegram bot details
+        bot_token = '${{ secrets.TELEGRAM_BOT_TOKEN }}'
+        chat_id = '${{ secrets.TELEGRAM_CHAT_ID }}'
+        
+        # Calculate current date and next trading day
+        today = datetime.now().strftime('%Y-%m-%d')
+        
+        message = f'''🔄 <b>DAILY TOKEN REFRESH REMINDER</b>
+        
+📅 <b>Date:</b> {today}
+⚠️ <b>Action Required:</b> Upstox token expires daily
+        
+<b>🔧 To refresh your token:</b>
+1. Visit: https://nifty50-ema-alerts.netlify.app/.netlify/functions/auth
+2. Login to Upstox (takes 30 seconds)
+3. Copy the new token from GitHub Actions logs
+4. Update UPSTOX_ACCESS_TOKEN in GitHub Secrets
+        
+<b>📍 Quick Links:</b>
+• <a href=\"https://nifty50-ema-alerts.netlify.app/.netlify/functions/auth\">🔐 Login</a>
+• <a href=\"https://github.com/nigamk1/python-alert/settings/secrets/actions\">⚙️ GitHub Secrets</a>
+• <a href=\"https://github.com/nigamk1/python-alert/actions\">📊 Actions</a>
+        
+💡 <b>Alternative:</b> The system will attempt to continue with existing token until it fails, then notify you.'''
+        
+        # Send reminder
+        url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
+        payload = {
+            'chat_id': chat_id,
+            'text': message,
+            'parse_mode': 'HTML',
+            'disable_web_page_preview': True
+        }
+        
+        try:
+            response = requests.post(url, json=payload)
+            if response.status_code == 200:
+                print('✅ Token refresh reminder sent successfully')
+            else:
+                print(f'❌ Failed to send reminder: {response.status_code}')
+        except Exception as e:
+            print(f'❌ Error sending reminder: {e}')
+        "

@@ -49,44 +49,83 @@ jobs:
         }
         EOF
         
-    - name: Run EMA Alert Check
+    - name: Run EMA Alert Check with Error Handling
       run: |
         python -c "
         import sys
-        sys.path.append('.')
-        from upstox_client import UpstoxClient
-        from telegram_bot import TelegramBot
         import json
+        from datetime import datetime
         
-        # Load config
-        with open('config.json') as f:
-            config = json.load(f)
-            
-        # Initialize clients
-        upstox = UpstoxClient(config['upstox'])
-        telegram = TelegramBot(config['telegram']['bot_token'], config['telegram']['chat_id'])
+        # Add current directory to path
+        sys.path.append('.')
         
         try:
-            # Check for EMA signals
-            data = upstox.get_nifty_data()
-            if data and len(data) >= 5:
-                ema = upstox.calculate_ema(data, 5)
-                current_price = data[-1]['close']
+            from upstox_client import UpstoxClient
+            from telegram_bot import TelegramBot
+            
+            print('🔍 Starting EMA alert check at', datetime.now())
+            
+            # Initialize clients
+            upstox = UpstoxClient()
+            bot = TelegramBot()
+            
+            # Get EMA data
+            result = upstox.get_nifty50_with_ema(5)
+            
+            if result:
+                current_price = result['close']
+                ema_value = result['ema']
                 
-                if current_price > ema:
-                    message = f'🚀 <b>BULLISH EMA SIGNAL</b>\n\n'
-                    message += f'📊 <b>Nifty 50:</b> ₹{current_price:,.2f}\n'
-                    message += f'📈 <b>EMA(5):</b> ₹{ema:,.2f}\n'
-                    message += f'🔥 <b>Signal:</b> BULLISH\n\n'
-                    message += f'⏰ <b>Time:</b> {data[-1][\"datetime\"]}'
+                print(f'📊 Current price: ₹{current_price:,.2f}')
+                print(f'📈 EMA(5): ₹{ema_value:,.2f}')
+                
+                # Check for bullish signal
+                if current_price > ema_value:
+                    # Send bullish alert
+                    message = f'''🚀 <b>BULLISH EMA SIGNAL</b>
+        
+        📊 <b>Nifty 50:</b> ₹{current_price:,.2f}
+        📈 <b>EMA(5):</b> ₹{ema_value:,.2f}
+        🔥 <b>Signal:</b> BULLISH
+        ⏰ <b>Time:</b> {result[\"datetime\"]}
+        
+        Price crossed above EMA - Bullish momentum detected!'''
                     
-                    telegram.send_alert(message)
-                    print(f'✅ Bullish signal sent: ₹{current_price:,.2f} > EMA ₹{ema:,.2f}')
+                    success = bot.send_message(message)
+                    if success:
+                        print('✅ Bullish alert sent successfully')
+                    else:
+                        print('⚠️ Failed to send Telegram alert')
                 else:
-                    print(f'💤 No bullish signal: ₹{current_price:,.2f} <= EMA ₹{ema:,.2f}')
+                    print(f'💤 No bullish signal: ₹{current_price:,.2f} <= EMA ₹{ema_value:,.2f}')
             else:
-                print('⚠️ Insufficient data for EMA calculation')
+                print('⚠️ No data available for EMA calculation')
+                
         except Exception as e:
-            print(f'❌ Error: {e}')
-            telegram.send_alert(f'⚠️ Alert system error: {str(e)}')
+            print(f'❌ Error in alert check: {e}')
+            
+            # Send error notification to Telegram if possible
+            try:
+                from telegram_bot import TelegramBot
+                bot = TelegramBot()
+                
+                error_msg = f'''⚠️ <b>ALERT SYSTEM ERROR</b>
+        
+        🕐 <b>Time:</b> {datetime.now().strftime(\"%Y-%m-%d %H:%M:%S\")}
+        ❌ <b>Error:</b> {str(e)}
+        
+        <b>Possible Solutions:</b>
+        • Token may have expired (need daily refresh)
+        • Market may be closed
+        • Network connectivity issue
+        
+        System will retry in 5 minutes.'''
+                
+                bot.send_message(error_msg)
+                print('📱 Error notification sent to Telegram')
+            except Exception as telegram_error:
+                print(f'❌ Could not send error notification: {telegram_error}')
+            
+            # Don't fail the workflow completely - just log the error
+            sys.exit(0)  # Exit with success to avoid workflow failure notifications
         "
