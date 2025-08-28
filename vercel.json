@@ -15,6 +15,9 @@
       "dest": "/api/$1"
     }
   ],
+  "buildCommand": "echo 'No build required for Python serverless functions'",
+  "outputDirectory": ".",
+  "installCommand": "pip install -r requirements.txt",
   "env": {
     "UPSTOX_CLIENT_ID": "@upstox_client_id",
     "UPSTOX_CLIENT_SECRET": "@upstox_client_secret",

@@ -3,14 +3,11 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "vercel dev",
-    "build": "echo 'Build complete'",
+    "build": "echo 'Python serverless functions - no build required'",
+    "vercel-build": "echo 'Python serverless functions - no build required'",
     "start": "echo 'Starting serverless functions'"
   },
-  "dependencies": {
-    "requests": "^2.31.0",
-    "pandas": "^2.0.3",
-    "numpy": "^1.24.3"
-  },
+  "dependencies": {},
   "engines": {
     "node": "18.x"
   }
