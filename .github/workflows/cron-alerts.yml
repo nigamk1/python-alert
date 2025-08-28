@@ -12,10 +12,81 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Trigger Netlify Function
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
       run: |
-        curl -X GET "${{ secrets.NETLIFY_FUNCTION_URL }}/check_alerts" \
-          -H "Content-Type: application/json" \
-          --max-time 30 \
-          --retry 3 \
-          --retry-delay 5
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Create config file
+      run: |
+        cat > config.json << EOF
+        {
+          "upstox": {
+            "client_id": "${{ secrets.UPSTOX_API_KEY }}",
+            "client_secret": "${{ secrets.UPSTOX_API_SECRET }}",
+            "redirect_uri": "https://nifty50-ema-alerts.netlify.app/.netlify/functions/auth"
+          },
+          "telegram": {
+            "bot_token": "${{ secrets.TELEGRAM_BOT_TOKEN }}",
+            "chat_id": "${{ secrets.TELEGRAM_CHAT_ID }}"
+          }
+        }
+        EOF
+        
+    - name: Create token file
+      run: |
+        cat > upstox_refresh.json << EOF
+        {
+          "access_token": "${{ secrets.UPSTOX_ACCESS_TOKEN }}"
+        }
+        EOF
+        
+    - name: Run EMA Alert Check
+      run: |
+        python -c "
+        import sys
+        sys.path.append('.')
+        from upstox_client import UpstoxClient
+        from telegram_bot import TelegramBot
+        import json
+        
+        # Load config
+        with open('config.json') as f:
+            config = json.load(f)
+            
+        # Initialize clients
+        upstox = UpstoxClient(config['upstox'])
+        telegram = TelegramBot(config['telegram']['bot_token'], config['telegram']['chat_id'])
+        
+        try:
+            # Check for EMA signals
+            data = upstox.get_nifty_data()
+            if data and len(data) >= 5:
+                ema = upstox.calculate_ema(data, 5)
+                current_price = data[-1]['close']
+                
+                if current_price > ema:
+                    message = f'🚀 <b>BULLISH EMA SIGNAL</b>\n\n'
+                    message += f'📊 <b>Nifty 50:</b> ₹{current_price:,.2f}\n'
+                    message += f'📈 <b>EMA(5):</b> ₹{ema:,.2f}\n'
+                    message += f'🔥 <b>Signal:</b> BULLISH\n\n'
+                    message += f'⏰ <b>Time:</b> {data[-1][\"datetime\"]}'
+                    
+                    telegram.send_alert(message)
+                    print(f'✅ Bullish signal sent: ₹{current_price:,.2f} > EMA ₹{ema:,.2f}')
+                else:
+                    print(f'💤 No bullish signal: ₹{current_price:,.2f} <= EMA ₹{ema:,.2f}')
+            else:
+                print('⚠️ Insufficient data for EMA calculation')
+        except Exception as e:
+            print(f'❌ Error: {e}')
+            telegram.send_alert(f'⚠️ Alert system error: {str(e)}')
+        "
