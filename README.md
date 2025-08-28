@@ -56,7 +56,13 @@ pip install pandas numpy requests
 
 ### Step 3: Configure API Keys
 
-Edit `config.json` with your credentials:
+Copy the sample config file and edit it with your credentials:
+
+```bash
+cp config.sample.json config.json
+```
+
+Then edit `config.json` with your actual credentials:
 
 ```json
 {
@@ -71,6 +77,8 @@ Edit `config.json` with your credentials:
   }
 }
 ```
+
+**⚠️ Important:** Never commit `config.json` to git as it contains sensitive API keys!
 
 ### Step 4: First-Time Authentication
 
