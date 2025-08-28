@@ -2,7 +2,7 @@
   "upstox": {
     "client_id": "a3747484-832d-4601-8e49-610e8b7f9eb2",
     "client_secret": "2u8mvmovmd",
-    "redirect_uri": "http://localhost:5000/callback"
+    "redirect_uri": "https://nifty50-ema-alerts.netlify.app/.netlify/functions/auth"
   },
   "telegram": {
     "bot_token": "7081191913:AAFtW8vR6AXsavzKw7RmuYgiSTFLcOhb7gg",
