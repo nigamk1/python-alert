@@ -16,8 +16,22 @@ A Python-based automated trading alert system that monitors Nifty 50 index using
 
 1. **Data Intervals**: Upstox API only supports: `1minute`, `30minute`, `day`, `week`, `month`
 2. **5-Minute Candles**: The system fetches 1-minute data and converts it to 5-minute candles
-3. **Token Management**: Upstox provides access tokens (not refresh tokens), so re-authentication is needed when tokens expire
+3. **Token Management**: Upstox access tokens expire daily (~14 hours) - requires daily refresh
 4. **Market Hours**: System works during market hours (9:15 AM - 3:30 PM IST)
+
+## 🎯 Daily Maintenance (30 seconds)
+
+### **📱 What You Need to Do Each Morning:**
+
+1. **🔗 Visit**: https://nifty50-ema-alerts.netlify.app/.netlify/functions/auth
+2. **🔐 Login**: Enter your Upstox credentials (30 seconds)
+3. **📋 Copy**: New access token from success page
+4. **⚙️ Update**: Paste in [GitHub Secrets](https://github.com/nigamk1/python-alert/settings/secrets/actions) → UPSTOX_ACCESS_TOKEN
+
+**✅ Done! System runs automatically for the day!**
+
+📖 **Detailed Guide**: [DAILY_ROUTINE.md](DAILY_ROUTINE.md)  
+🔧 **Technical Details**: [TOKEN_MANAGEMENT.md](TOKEN_MANAGEMENT.md)
 
 ## 📁 Project Structure
 
