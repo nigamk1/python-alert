@@ -1,0 +1,21 @@
+name: Nifty 50 EMA Alerts Cron
+
+on:
+  schedule:
+    # Run every 5 minutes during market hours (9:15 AM to 3:30 PM IST)
+    # This is in UTC, so IST 9:15 AM = UTC 3:45 AM
+    - cron: '*/5 4-10 * * 1-5'  # Monday to Friday, 4:00 AM to 10:00 AM UTC (9:30 AM to 3:30 PM IST)
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  check-alerts:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Trigger Netlify Function
+      run: |
+        curl -X GET "${{ secrets.NETLIFY_FUNCTION_URL }}/check_alerts" \
+          -H "Content-Type: application/json" \
+          --max-time 30 \
+          --retry 3 \
+          --retry-delay 5

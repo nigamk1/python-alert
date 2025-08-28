@@ -120,9 +120,9 @@
         </div>
 
         <div style="text-align: center; margin: 30px 0;">
-            <a href="/api/auth" class="button">🔐 Setup Authentication</a>
-            <a href="/api/status" class="button secondary">📈 Check Status</a>
-            <a href="/api/check_alerts" class="button secondary">🔔 Manual Alert Check</a>
+            <a href="/.netlify/functions/auth" class="button">🔐 Setup Authentication</a>
+            <a href="/.netlify/functions/status" class="button secondary">📈 Check Status</a>
+            <a href="/.netlify/functions/check_alerts" class="button secondary">🔔 Manual Alert Check</a>
         </div>
 
         <div class="status-card">
@@ -139,13 +139,13 @@
         <div class="endpoint-list">
             <h2>🔗 API Endpoints</h2>
             <div class="endpoint">
-                <strong>GET /api/status</strong> - System status and health check
+                <strong>GET /.netlify/functions/status</strong> - System status and health check
             </div>
             <div class="endpoint">
-                <strong>GET /api/auth</strong> - One-time Upstox authentication setup
+                <strong>GET /.netlify/functions/auth</strong> - One-time Upstox authentication setup
             </div>
             <div class="endpoint">
-                <strong>GET /api/check_alerts</strong> - Manual alert check (also runs automatically)
+                <strong>GET /.netlify/functions/check_alerts</strong> - Manual alert check (also triggered by GitHub Actions)
             </div>
         </div>
 
@@ -160,7 +160,7 @@
 💡 <strong>Signal:</strong> Candle is fully above EMA
 🎯 <strong>Trend:</strong> Bullish momentum detected
 
-<em>Automated alert from Vercel deployment</em></div>
+<em>Automated alert from Netlify deployment</em></div>
         </div>
 
         <div class="status-card">
@@ -175,7 +175,7 @@
         </div>
 
         <div class="footer">
-            <p>🤖 Powered by Vercel Serverless Functions | 📈 Real-time Market Data from Upstox</p>
+            <p>🤖 Powered by Netlify Functions + GitHub Actions | 📈 Real-time Market Data from Upstox</p>
             <p><small>For support or customization, check the GitHub repository</small></p>
         </div>
     </div>
